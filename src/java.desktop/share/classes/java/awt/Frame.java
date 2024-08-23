@@ -927,20 +927,8 @@ public class Frame extends Window implements MenuContainer {
     public void setUndecorated(boolean undecorated) {
         /* Make sure we don't run in the middle of peer creation.*/
         synchronized (getTreeLock()) {
-            if (isDisplayable()) {
-                throw new IllegalComponentStateException("The frame is displayable.");
-            }
             if (!undecorated) {
-                if (getOpacity() < 1.0f) {
-                    throw new IllegalComponentStateException("The frame is not opaque");
-                }
-                if (getShape() != null) {
-                    throw new IllegalComponentStateException("The frame does not have a default shape");
-                }
                 Color bg = getBackground();
-                if ((bg != null) && (bg.getAlpha() < 255)) {
-                    throw new IllegalComponentStateException("The frame background color is not opaque");
-                }
             }
             this.undecorated = undecorated;
         }
@@ -964,9 +952,6 @@ public class Frame extends Window implements MenuContainer {
     @Override
     public void setOpacity(float opacity) {
         synchronized (getTreeLock()) {
-            if ((opacity < 1.0f) && !isUndecorated()) {
-                throw new IllegalComponentStateException("The frame is decorated");
-            }
             super.setOpacity(opacity);
         }
     }
@@ -977,9 +962,6 @@ public class Frame extends Window implements MenuContainer {
     @Override
     public void setShape(Shape shape) {
         synchronized (getTreeLock()) {
-            if ((shape != null) && !isUndecorated()) {
-                throw new IllegalComponentStateException("The frame is decorated");
-            }
             super.setShape(shape);
         }
     }
@@ -990,9 +972,6 @@ public class Frame extends Window implements MenuContainer {
     @Override
     public void setBackground(Color bgColor) {
         synchronized (getTreeLock()) {
-            if ((bgColor != null) && (bgColor.getAlpha() < 255) && !isUndecorated()) {
-                throw new IllegalComponentStateException("The frame is decorated");
-            }
             super.setBackground(bgColor);
         }
     }
