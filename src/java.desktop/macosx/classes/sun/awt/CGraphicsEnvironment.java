@@ -110,6 +110,10 @@ public final class CGraphicsEnvironment extends SunGraphicsEnvironment {
             }
         }
 
+        if (MacOSFlags.isBackgroundBlurEnabled()) {
+            backgroundBlurEnabled = true;
+        }
+
         // Install the correct surface manager factory.
         SurfaceManagerFactory.setInstance(new MacosxSurfaceManagerFactory());
     }
@@ -129,9 +133,14 @@ public final class CGraphicsEnvironment extends SunGraphicsEnvironment {
     private native void deregisterDisplayReconfiguration(long context);
 
     private static boolean metalPipelineEnabled;
+    private static boolean backgroundBlurEnabled;
 
     public static boolean usingMetalPipeline() {
         return metalPipelineEnabled;
+    }
+
+    public static boolean backgroundBlurEnabled() {
+        return backgroundBlurEnabled;
     }
 
     /** Available CoreGraphics displays. */

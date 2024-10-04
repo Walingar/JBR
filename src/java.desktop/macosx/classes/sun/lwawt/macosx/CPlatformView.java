@@ -45,7 +45,7 @@ import sun.util.logging.PlatformLogger;
 public class CPlatformView extends CFRetainedResource {
     private static final PlatformLogger logger =
             PlatformLogger.getLogger(CPlatformView.class.getName());
-    private native long nativeCreateView(int x, int y, int width, int height, long windowLayerPtr);
+    private native long nativeCreateView(int x, int y, int width, int height, long windowLayerPtr, boolean backgroundBlur);
     private static native void nativeSetAutoResizable(long awtView, boolean toResize);
     private static native int nativeGetNSViewDisplayID(long awtView);
     private static native Rectangle2D nativeGetLocationOnScreen(long awtView);
@@ -64,7 +64,8 @@ public class CPlatformView extends CFRetainedResource {
         initializeBase(peer, responder);
 
         this.windowLayer = CGraphicsEnvironment.usingMetalPipeline()? createMTLLayer() : createCGLayer();
-        setPtr(nativeCreateView(0, 0, 0, 0, getWindowLayerPtr()));
+        boolean backgroundBlur = CGraphicsEnvironment.backgroundBlurEnabled();
+        setPtr(nativeCreateView(0, 0, 0, 0, getWindowLayerPtr(), backgroundBlur));
     }
 
     public CGLLayer createCGLayer() {

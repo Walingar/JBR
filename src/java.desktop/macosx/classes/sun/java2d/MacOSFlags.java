@@ -43,6 +43,7 @@ public class MacOSFlags {
     private static boolean metalEnabled;
     private static boolean metalDisplaySyncEnabled;
     private static boolean metalVerbose;
+    private static boolean backgroundBlurEnabled;
 
     private enum PropertyState {ENABLED, DISABLED, UNSPECIFIED}
 
@@ -90,6 +91,12 @@ public class MacOSFlags {
                 (PrivilegedAction<Object>) () -> {
                     PropertyState oglState = getBooleanProp("sun.java2d.opengl", PropertyState.UNSPECIFIED);
                     PropertyState metalState = getBooleanProp("sun.java2d.metal", PropertyState.UNSPECIFIED);
+
+                    PropertyState backgroundBlurState = getBooleanProp("sun.java2d.backgroundBlur", PropertyState.UNSPECIFIED);
+
+                    if (backgroundBlurState == PropertyState.ENABLED) {
+                        backgroundBlurEnabled = true;
+                    }
 
                     // Handle invalid combinations to use the default rendering pipeline
                     // The default rendering pipeline is Metal
@@ -149,6 +156,10 @@ public class MacOSFlags {
 
                     return null;
                 });
+    }
+
+    public static boolean isBackgroundBlurEnabled() {
+        return backgroundBlurEnabled;
     }
 
     public static boolean isMetalEnabled() {

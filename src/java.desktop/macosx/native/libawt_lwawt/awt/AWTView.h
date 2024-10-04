@@ -59,7 +59,7 @@
 @property (nonatomic, retain) id cglLayer;
 @property (nonatomic) BOOL mouseIsOver;
 
-- (id) initWithRect:(NSRect) rect platformView:(jobject)cPlatformView windowLayer:(CALayer*)windowLayer;
+- (id) initWithRect:(NSRect) rect platformView:(jobject)cPlatformView windowLayer:(CALayer*)windowLayer backgroundBlur: (BOOL)backgroundBlur;
 - (void) deliverJavaMouseEvent: (NSEvent *) event;
 - (jobject) awtComponent:(JNIEnv *)env;
 

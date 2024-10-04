@@ -79,6 +79,7 @@ extern bool isSystemShortcut_NextWindowInApplication(NSUInteger modifiersMask, i
 - (id) initWithRect: (NSRect) rect
        platformView: (jobject) cPlatformView
         windowLayer: (CALayer*) windowLayer
+        backgroundBlur: (BOOL) backgroundBlur
 {
     AWT_ASSERT_APPKIT_THREAD;
     // Initialize ourselves
@@ -96,18 +97,29 @@ extern bool isSystemShortcut_NextWindowInApplication(NSUInteger modifiersMask, i
 
     mouseIsOver = NO;
     [self resetTrackingArea];
-    [self setAutoresizesSubviews:NO];
+    [self setAutoresizesSubviews:YES];
 
     if (windowLayer != nil) {
-        self.cglLayer = windowLayer;
-        //Layer hosting view
-        [self setLayer: cglLayer];
         [self setWantsLayer: YES];
-        //Layer backed view
-        //[self.layer addSublayer: (CALayer *)cglLayer];
-        //[self setLayerContentsRedrawPolicy: NSViewLayerContentsRedrawDuringViewResize];
-        //[self setLayerContentsPlacement: NSViewLayerContentsPlacementTopLeft];
-        //[self setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+        self.cglLayer = windowLayer;
+
+        if (!backgroundBlur) {
+            //Layer hosting view
+            [self setLayer: cglLayer];
+        } else {
+            NSView *layerContainerView = [[NSView alloc] initWithFrame:self.bounds];
+            layerContainerView.wantsLayer = YES;
+            layerContainerView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+            [layerContainerView setLayer:windowLayer];
+
+            NSVisualEffectView *blurEffectView = [[NSVisualEffectView alloc] initWithFrame:self.bounds];
+            blurEffectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+            blurEffectView.state = NSVisualEffectStateActive;
+            blurEffectView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+            [self addSubview:layerContainerView positioned:NSWindowAbove relativeTo:nil];
+            [self addSubview:blurEffectView positioned:NSWindowBelow relativeTo:layerContainerView];
+        }
     }
 
     return self;
@@ -1667,7 +1679,7 @@ static jclass jc_CInputMethod = NULL;
  */
 JNIEXPORT jlong JNICALL
 Java_sun_lwawt_macosx_CPlatformView_nativeCreateView
-(JNIEnv *env, jobject obj, jint originX, jint originY, jint width, jint height, jlong windowLayerPtr)
+(JNIEnv *env, jobject obj, jint originX, jint originY, jint width, jint height, jlong windowLayerPtr, jboolean backgroundBlur)
 {
     __block AWTView *newView = nil;
 
@@ -1682,7 +1694,8 @@ Java_sun_lwawt_macosx_CPlatformView_nativeCreateView
         CALayer *windowLayer = jlong_to_ptr(windowLayerPtr);
         newView = [[AWTView alloc] initWithRect:rect
                                    platformView:cPlatformView
-                                    windowLayer:windowLayer];
+                                    windowLayer:windowLayer
+                                    backgroundBlur:backgroundBlur];
     }];
 
     JNI_COCOA_EXIT(env);
